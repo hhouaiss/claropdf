@@ -88,7 +88,7 @@ const Charts: React.FC<ChartsProps> = ({ chartSuggestions, csvData }) => {
           ))}
         </div>
       ) : (
-        <p>No chart suggestions available for this data.</p>
+        <p>No chart suggestions available for this data. 1</p>
       )}
     </div>
   );
