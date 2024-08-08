@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { analyzePDF, extractTextFromPDF, AnalysisResult } from '../services/api';
 import FileUpload from './FileUpload';
 import Dashboard from './Dashboard';
+import Footer from './Footer';
 
 const DataClaro: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -32,7 +33,7 @@ const DataClaro: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           {/* Logo */}
@@ -51,7 +52,7 @@ const DataClaro: React.FC = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-16 flex-grow">
         <h1 className="text-5xl md:text-6xl font-bold text-center mb-6">
           Unlock the Power of Your PDFs with 
           <span className="text-red-600"><br/>AI-Driven Insights</span>
@@ -85,6 +86,7 @@ const DataClaro: React.FC = () => {
         
         {analysis && <Dashboard analysisResult={analysis} />}
       </main>
+      <Footer />
     </div>
   );
 };
