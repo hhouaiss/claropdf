@@ -41,23 +41,59 @@ export async function extractTextFromPDF(file: File): Promise<string> {
   }
 }
 
+function parseAIResponse(responseText: string): AnalysisResult {
+  let parsedResponse: Partial<AnalysisResult> = {};
+
+  try {
+    // Attempt to parse the entire response as JSON
+    parsedResponse = JSON.parse(responseText);
+  } catch (error) {
+    console.error("Failed to parse entire response as JSON. Attempting to extract JSON.");
+    
+    // If parsing fails, try to extract JSON from the text
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        parsedResponse = JSON.parse(jsonMatch[0]);
+      } catch (innerError) {
+        console.error("Failed to extract and parse JSON from response.");
+      }
+    }
+  }
+
+  // Ensure all required properties exist with default values
+  const defaultResult: AnalysisResult = {
+    summary: { text: "No summary available.", page: 0 },
+    key_insights: [],
+    key_statistics: [],
+    action_items: []
+  };
+
+  return {
+    summary: parsedResponse.summary || defaultResult.summary,
+    key_insights: parsedResponse.key_insights || defaultResult.key_insights,
+    key_statistics: parsedResponse.key_statistics || defaultResult.key_statistics,
+    action_items: parsedResponse.action_items || defaultResult.action_items
+  };
+}
+
 export async function analyzePDF(text: string): Promise<AnalysisResult> {
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
           role: "system",
-          content: "You are an expert at analyzing documents and extracting key information. Focus on the actual content of the document, not its structure or format."
+          content: "You are an expert at analyzing documents and extracting key information. Respond in JSON format only."
         },
         {
           role: "user",
-          content: `Analyze the following text from a PDF document and provide:
-          1. A brief summary of the main content (max 50 words)
-          2. 4-5 key insights or main points from the document, each with a title and brief explanation
-          3. 3-4 important statistics or numbers mentioned in the document, if any
-          4. 2-3 action items or recommendations based on the document's content
+          content: `Analyze the following text and provide:
+          1. A brief summary (max 150 words)
+          2. 4-5 key insights, each with a title and brief explanation
+          3. 3-4 important statistics or numbers, each with a label and value
+          4. 2-3 action items or recommendations
 
-          Respond in this JSON format:
+          Respond ONLY with a JSON object in this exact format:
           {
             "summary": {"text": "Brief summary here", "page": 1},
             "key_insights": [
@@ -71,7 +107,7 @@ export async function analyzePDF(text: string): Promise<AnalysisResult> {
             ]
           }
 
-          Text to analyze: ${text.substring(0, 20000)}`
+          Text to analyze: ${text.substring(0, 30000)}`
         }
       ],
       model: "llama-3.1-70b-versatile",
@@ -87,26 +123,17 @@ export async function analyzePDF(text: string): Promise<AnalysisResult> {
     if (chatCompletion.choices && chatCompletion.choices[0] && chatCompletion.choices[0].message) {
       const content = chatCompletion.choices[0].message.content;
       if (content !== null) {
-        return JSON.parse(content) as AnalysisResult;
+        return parseAIResponse(content);
       }
     }
     throw new Error('Unexpected API response structure');
   } catch (error: any) {
     console.error('Error details:', error);
-    
-    let errorMessage = 'An unexpected error occurred';
-    if (error.response && error.response.status === 400) {
-      errorMessage = 'Bad request: The API could not process the document. Please check the file and try again.';
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    // Return a valid AnalysisResult structure even in case of error
     return {
-      summary: { text: `Error: ${errorMessage}`, page: 0 },
-      key_insights: [{ title: "Error", explanation: "An error occurred during analysis", page: 0 }],
+      summary: { text: `Error: ${error.message}`, page: 0 },
+      key_insights: [],
       key_statistics: [],
-      action_items: [{ text: "Please try again or contact support if the issue persists.", page: 0 }]
+      action_items: [{ text: "An error occurred. Please try again or contact support.", page: 0 }]
     };
   }
 }
