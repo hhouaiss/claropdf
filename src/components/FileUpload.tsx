@@ -63,7 +63,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
         accept=".pdf,.csv"
         onChange={handleChange}
       />
-      <p className="mb-2">Drag and drop your PDF or CSV file here, or</p>
+      <p className="mb-2">Drag and drop your PDF here, or</p>
       <button
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         onClick={onButtonClick}

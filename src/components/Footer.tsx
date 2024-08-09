@@ -1,5 +1,5 @@
 import React from 'react';
-import { MailIcon, GithubIcon, TwitterIcon } from "lucide-react";
+import { MailIcon, TwitterIcon } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -13,10 +13,10 @@ const Footer = () => {
           <a href="mailto:info@mywebapp.com" target="_blank" rel="noopener noreferrer">
             <MailIcon className="h-6 w-6 hover:text-gray-400" />
           </a>
-          <a href="https://github.com/mywebapp" target="_blank" rel="noopener noreferrer">
+          {/* <a href="https://github.com/mywebapp" target="_blank" rel="noopener noreferrer">
             <GithubIcon className="h-6 w-6 hover:text-gray-400" />
-          </a>
-          <a href="https://twitter.com/mywebapp" target="_blank" rel="noopener noreferrer">
+          </a> */}
+          <a href="https://twitter.com/HHouaiss" target="_blank" rel="noopener noreferrer">
             <TwitterIcon className="h-6 w-6 hover:text-gray-400" />
           </a>
         </div>

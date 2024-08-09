@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { analyzePDF, extractTextFromPDF, AnalysisResult } from '../services/api';
+// import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+// import AboutPage from './AboutPage';
+// import ContactPage from './ContactPage';
 import FileUpload from './FileUpload';
 import Dashboard from './Dashboard';
 import Footer from './Footer';
+import { DocumentTextIcon, ChartBarIcon, LightBulbIcon } from '@heroicons/react/outline';
 
 const DataClaro: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -45,8 +49,10 @@ const DataClaro: React.FC = () => {
           {/* Small menu */}
           <nav>
             <ul className="flex space-x-4">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">About</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Contact</a></li>
+              {/* <li className="text-gray-600 hover:text-gray-900">About</li> */}
+              <li className="text-gray-600 hover:text-gray-900">
+                <a href="mailto:info@mywebapp.com" target="_blank" rel="noopener noreferrer">Contact</a>
+              </li>
             </ul>
           </nav>
         </div>
@@ -85,6 +91,30 @@ const DataClaro: React.FC = () => {
         )}
         
         {analysis && <Dashboard analysisResult={analysis} />}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 mt-10">
+          <div className="text-center">
+            <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-red-600" />
+            <h3 className="text-2xl font-semibold mb-2">Intelligent Document Analysis</h3>
+            <p className="text-gray-600">
+              ClaroPDF uses advanced AI algorithms to analyze the structure and content of your PDFs, extracting key information and insights.
+            </p>
+          </div>
+          <div className="text-center">
+            <ChartBarIcon className="h-12 w-12 mx-auto mb-4 text-red-600" />
+            <h3 className="text-2xl font-semibold mb-2">Interactive Data Visualization</h3>
+            <p className="text-gray-600">
+              Transform extracted data into interactive visual dashboards, enabling you to explore and gain valuable insights from your PDFs.
+            </p>
+          </div>
+          <div className="text-center">
+            <LightBulbIcon className="h-12 w-12 mx-auto mb-4 text-red-600" />
+            <h3 className="text-2xl font-semibold mb-2">Actionable Insights</h3>
+            <p className="text-gray-600">
+              Gain actionable insights from your PDFs, empowering you to make data-driven decisions and streamline your workflows.
+            </p>
+          </div>
+        </div>
       </main>
       <Footer />
     </div>
