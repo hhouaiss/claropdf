@@ -51,7 +51,7 @@ const DataClaro: React.FC = () => {
             <ul className="flex space-x-4">
               {/* <li className="text-gray-600 hover:text-gray-900">About</li> */}
               <li className="text-gray-600 hover:text-gray-900">
-                <a href="mailto:info@mywebapp.com" target="_blank" rel="noopener noreferrer">Contact</a>
+                <a href="mailto:hello@claropdf.com" target="_blank" rel="noopener noreferrer">Contact</a>
               </li>
             </ul>
           </nav>

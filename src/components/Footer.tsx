@@ -10,7 +10,7 @@ const Footer = () => {
           <p className="mt-2 text-gray-400">&copy; {new Date().getFullYear()} All rights reserved.</p>
         </div>
         <div className="flex space-x-4">
-          <a href="mailto:info@mywebapp.com" target="_blank" rel="noopener noreferrer">
+          <a href="mailto:hello@claropdf.com" target="_blank" rel="noopener noreferrer">
             <MailIcon className="h-6 w-6 hover:text-gray-400" />
           </a>
           {/* <a href="https://github.com/mywebapp" target="_blank" rel="noopener noreferrer">
