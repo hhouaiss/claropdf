@@ -1,4 +1,19 @@
+# www.claropdf.com robots.txt file
+# Last updated: [Current Date]
+
 User-agent: *
 Allow: /
+Allow: /blog/
+Allow: /features/
+Allow: /about/
+Disallow: /admin/
+Disallow: /private/
 
+# Optional: Adjust crawl rate
+# Crawl-delay: 10
+
+# Sitemaps
 Sitemap: https://claropdf.com/sitemap.xml
+Sitemap: https://claropdf.com/blog-sitemap.xml
+
+# Additional rules can be added as needed
