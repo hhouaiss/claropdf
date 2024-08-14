@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useParams, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
-import { AnalysisResult } from '../services/api';
+import LoadingAnimation from './LoadingAnimation';
+import { AnalysisResult, analyzePDF, extractTextFromPDF } from '../services/api';
 
 const AnalysisResultPage: React.FC = () => {
   const location = useLocation();
@@ -13,9 +14,27 @@ const AnalysisResultPage: React.FC = () => {
   );
   const [pdfName, setPdfName] = useState<string>(location.state?.pdfName || 'Unnamed PDF');
   const [shareLink, setShareLink] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(location.state?.isLoading || false);
+  const [error, setError] = useState<string | null>(location.state?.error || null);
 
   useEffect(() => {
+    const analyzeDocument = async () => {
+      if (location.state?.isLoading && location.state?.file) {
+        try {
+          const text = await extractTextFromPDF(location.state.file);
+          const result = await analyzePDF(text);
+          setAnalysisResult(result);
+          setIsLoading(false);
+        } catch (error: any) {
+          console.error('Error analyzing document:', error);
+          setError(`Error: ${error.message}`);
+          setIsLoading(false);
+        }
+      }
+    };
+
     if (shareId) {
+      setIsLoading(true);
       // Fetch the shared analysis result using the shareId
       // This is a placeholder and should be replaced with your actual API call
       const fetchSharedResult = async () => {
@@ -26,11 +45,16 @@ const AnalysisResultPage: React.FC = () => {
           setPdfName(data.pdfName);
         } catch (error) {
           console.error('Error fetching shared analysis:', error);
+          setError('Failed to load shared analysis');
+        } finally {
+          setIsLoading(false);
         }
       };
       fetchSharedResult();
+    } else {
+      analyzeDocument();
     }
-  }, [shareId]);
+  }, [location.state, shareId]);
 
   const handleShare = async () => {
     // This is a placeholder and should be replaced with your actual sharing logic
@@ -46,6 +70,28 @@ const AnalysisResultPage: React.FC = () => {
       console.error('Error sharing analysis:', error);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-4">
+          <LoadingAnimation />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-4">
+          <h1 className="text-3xl font-bold mb-6">Error</h1>
+          <p className="text-red-600">{error}</p>
+          <Link to="/" className="mt-4 text-blue-600 hover:text-blue-800">Go back to home</Link>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!analysisResult) {
     return (

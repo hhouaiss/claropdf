@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { analyzePDF, extractTextFromPDF, AnalysisResult } from '../services/api';
+import { analyzePDF, extractTextFromPDF } from '../services/api';
 import FileUpload from './FileUpload';
 import Layout from './Layout';
 import { DocumentTextIcon, ChartBarIcon, LightBulbIcon } from '@heroicons/react/outline';
 
 const DataClaro: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -19,22 +18,39 @@ const DataClaro: React.FC = () => {
   const analyzeDocument = async () => {
     if (!file) return;
 
-    setIsLoading(true);
     setError(null);
+    // Navigate to the analysis result page immediately
+    navigate('/analysis-result', { 
+      state: { 
+        isLoading: true,
+        pdfName: file.name,
+        file: file
+      } 
+    });
+
     try {
       const text = await extractTextFromPDF(file);
       const result = await analyzePDF(text);
+      
+      // Update the analysis result page with the results
       navigate('/analysis-result', { 
         state: { 
           analysisResult: result,
-          pdfName: file.name
-        } 
+          pdfName: file.name,
+          isLoading: false
+        },
+        replace: true  // This replaces the current history entry instead of adding a new one
       });
     } catch (error: any) {
       console.error('Error analyzing document:', error);
-      setError(`Error: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+      navigate('/analysis-result', { 
+        state: { 
+          error: `Error: ${error.message}`,
+          pdfName: file.name,
+          isLoading: false
+        },
+        replace: true
+      });
     }
   };
 
@@ -57,10 +73,10 @@ const DataClaro: React.FC = () => {
       <div className="text-center">
         <button 
           onClick={analyzeDocument}
-          disabled={!file || isLoading}
+          disabled={!file}
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-xl transition duration-300 ease-in-out transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Analyzing...' : 'Analyze Document'}
+          Analyze Document
         </button>
       </div>
       

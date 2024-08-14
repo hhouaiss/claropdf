@@ -42,44 +42,35 @@ export async function extractTextFromPDF(file: File): Promise<string> {
 }
 
 function parseAIResponse(responseText: string): AnalysisResult {
-  let parsedResponse: Partial<AnalysisResult> = {};
-
   try {
-    // Attempt to parse the entire response as JSON
-    parsedResponse = JSON.parse(responseText);
-  } catch (error) {
-    console.error("Failed to parse entire response as JSON. Attempting to extract JSON.");
-    
-    // If parsing fails, try to extract JSON from the text
+    // Try to extract JSON from the response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        parsedResponse = JSON.parse(jsonMatch[0]);
-      } catch (innerError) {
-        console.error("Failed to extract and parse JSON from response.");
-      }
+    const jsonString = jsonMatch ? jsonMatch[0] : responseText;
+
+    console.log('Extracted JSON string:', jsonString);
+
+    const parsed = JSON.parse(jsonString);
+    
+    // Validate the parsed object has the expected structure
+    if (!parsed.summary || !parsed.key_insights || !parsed.key_statistics || !parsed.action_items) {
+      throw new Error('Response is missing required fields');
     }
+    
+    return parsed as AnalysisResult;
+  } catch (error) {
+    console.error("Failed to parse AI response as JSON:", error);
+    console.error("Raw response:", responseText);
+    
+    // Safely extract error message
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    
+    throw new Error(`Failed to parse AI response: ${errorMessage}`);
   }
-
-  // Ensure all required properties exist with default values
-  const defaultResult: AnalysisResult = {
-    summary: { text: "No summary available.", page: 0 },
-    key_insights: [],
-    key_statistics: [],
-    action_items: []
-  };
-
-  return {
-    summary: parsedResponse.summary || defaultResult.summary,
-    key_insights: parsedResponse.key_insights || defaultResult.key_insights,
-    key_statistics: parsedResponse.key_statistics || defaultResult.key_statistics,
-    action_items: parsedResponse.action_items || defaultResult.action_items
-  };
 }
 
 export async function analyzePDF(text: string): Promise<AnalysisResult> {
   try {
-    const chatCompletion = await groq.chat.completions.create({
+    const response = await groq.chat.completions.create({
       messages: [
         {
           role: "system",
@@ -118,10 +109,10 @@ export async function analyzePDF(text: string): Promise<AnalysisResult> {
       stop: null
     });
 
-    console.log('Raw API Response:', chatCompletion);
+    console.log('Raw API Response:', response);
 
-    if (chatCompletion.choices && chatCompletion.choices[0] && chatCompletion.choices[0].message) {
-      const content = chatCompletion.choices[0].message.content;
+    if (response.choices && response.choices[0] && response.choices[0].message) {
+      const content = response.choices[0].message.content;
       if (content !== null) {
         return parseAIResponse(content);
       }
@@ -129,11 +120,9 @@ export async function analyzePDF(text: string): Promise<AnalysisResult> {
     throw new Error('Unexpected API response structure');
   } catch (error: any) {
     console.error('Error details:', error);
-    return {
-      summary: { text: `Error: ${error.message}`, page: 0 },
-      key_insights: [],
-      key_statistics: [],
-      action_items: [{ text: "An error occurred. Please try again or contact support.", page: 0 }]
-    };
+    if (error.response) {
+      console.error('API response:', error.response.data);
+    }
+    throw new Error(`Error analyzing PDF: ${error.message}`);
   }
 }
