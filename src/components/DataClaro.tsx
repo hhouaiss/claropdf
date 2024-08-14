@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { analyzePDF, extractTextFromPDF, AnalysisResult } from '../services/api';
 import FileUpload from './FileUpload';
-import Dashboard from './Dashboard';
 import Layout from './Layout';
 import { DocumentTextIcon, ChartBarIcon, LightBulbIcon } from '@heroicons/react/outline';
 
 const DataClaro: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleFileUpload = (uploadedFile: File) => {
     setFile(uploadedFile);
@@ -24,7 +24,7 @@ const DataClaro: React.FC = () => {
     try {
       const text = await extractTextFromPDF(file);
       const result = await analyzePDF(text);
-      setAnalysis(result);
+      navigate('/analysis-result', { state: { analysisResult: result } });
     } catch (error: any) {
       console.error('Error analyzing document:', error);
       setError(`Error: ${error.message}`);
@@ -65,8 +65,6 @@ const DataClaro: React.FC = () => {
           <p>{error}</p>
         </div>
       )}
-      
-      {analysis && <Dashboard analysisResult={analysis} />}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 mt-10">
         <div className="text-center">

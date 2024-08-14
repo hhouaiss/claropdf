@@ -23,7 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysisResult }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">PDF Analysis Dashboard</h1>
+      {/* <h1 className="text-3xl font-bold mb-6">PDF Analysis Dashboard</h1> */}
       
       {/* Summary */}
       <div className="mb-6">
