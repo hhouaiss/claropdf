@@ -24,7 +24,12 @@ const DataClaro: React.FC = () => {
     try {
       const text = await extractTextFromPDF(file);
       const result = await analyzePDF(text);
-      navigate('/analysis-result', { state: { analysisResult: result } });
+      navigate('/analysis-result', { 
+        state: { 
+          analysisResult: result,
+          pdfName: file.name
+        } 
+      });
     } catch (error: any) {
       console.error('Error analyzing document:', error);
       setError(`Error: ${error.message}`);
