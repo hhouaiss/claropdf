@@ -58,7 +58,7 @@ const DataClaro: React.FC = () => {
     <Layout>
       <h1 className="text-5xl md:text-6xl font-bold text-center mb-6">
         Unlock the Power of Your PDFs with 
-        <span className="text-red-600"><br/>AI-Driven Insights!</span>
+        <span className="text-red-600"><br/>AI-Driven Insights</span>
       </h1>
       
       <p className="text-xl text-center mb-12 max-w-3xl mx-auto">
