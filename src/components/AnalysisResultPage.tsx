@@ -14,30 +14,39 @@ const AnalysisResultPage: React.FC = () => {
 
   useEffect(() => {
     const saveAnalysisResult = async () => {
+      console.log('Starting saveAnalysisResult');
       if (location.state?.analysisResult) {
+        console.log('Analysis result found in location state');
         setAnalysisResult(location.state.analysisResult);
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Session:', session);
         const user = session?.user;
         if (user) {
+          console.log('User found, attempting to save analysis');
           try {
             const { error: insertError } = await supabase.from('pdf_analyses').insert({
               user_id: user.id,
               pdf_name: location.state?.pdfName || 'Unnamed PDF',
               analysis_result: location.state.analysisResult,
             });
-
+  
             if (insertError) throw insertError;
+            console.log('Analysis saved successfully');
           } catch (err) {
             console.error('Error saving analysis result:', err);
             setError('Failed to save analysis result');
           }
+        } else {
+          console.log('No user found in session');
         }
       } else {
+        console.log('No analysis result in location state');
         setError('No analysis result available');
       }
       setIsLoading(false);
+      console.log('Finished saveAnalysisResult');
     };
-
+  
     saveAnalysisResult();
   }, [location.state]);
 
