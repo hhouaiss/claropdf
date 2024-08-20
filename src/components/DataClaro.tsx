@@ -19,20 +19,38 @@ const DataClaro: React.FC = () => {
     if (!file) return;
 
     setError(null);
+    // Navigate to the analysis result page immediately
+    navigate('/analysis-result', { 
+      state: { 
+        isLoading: true,
+        pdfName: file.name,
+        file: file
+      } 
+    });
+
     try {
       const text = await extractTextFromPDF(file);
       const result = await analyzePDF(text);
       
-      // Navigate to the analysis result page with the result
+      // Update the analysis result page with the results
       navigate('/analysis-result', { 
         state: { 
           analysisResult: result,
           pdfName: file.name,
-        }
+          isLoading: false
+        },
+        replace: true  // This replaces the current history entry instead of adding a new one
       });
     } catch (error: any) {
       console.error('Error analyzing document:', error);
-      setError(`Error: ${error.message}`);
+      navigate('/analysis-result', { 
+        state: { 
+          error: `Error: ${error.message}`,
+          pdfName: file.name,
+          isLoading: false
+        },
+        replace: true
+      });
     }
   };
 
