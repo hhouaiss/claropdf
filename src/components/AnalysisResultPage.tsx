@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../services/supabase';
 import { useLocation, Link, useParams, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
@@ -25,6 +26,16 @@ const AnalysisResultPage: React.FC = () => {
           const result = await analyzePDF(text);
           setAnalysisResult(result);
           setIsLoading(false);
+
+          // Save analysis result to Supabase
+          const { error } = await supabase.from('pdf_analyses').insert({
+            pdf_name: location.state.pdfName,
+            analysis_result: result,
+          });
+
+          if (error) {
+            console.error('Error saving analysis result:', error);
+          }
         } catch (error: any) {
           console.error('Error analyzing document:', error);
           setError(`Error: ${error.message}`);
