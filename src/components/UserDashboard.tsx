@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import Layout from './Layout';
+import ConfirmDialog from './ConfirmDialog';
 
 interface PdfAnalysis {
   id: string;
@@ -13,6 +14,8 @@ const UserDashboard: React.FC = () => {
   const [analyses, setAnalyses] = useState<PdfAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAnalyses();
@@ -40,11 +43,18 @@ const UserDashboard: React.FC = () => {
     setIsLoading(false);
   };
 
-  const handleDelete = async (id: string) => {
-    // Confirm before deleting
-    if (!window.confirm('Are you sure you want to delete this analysis? This action cannot be undone.')) {
-      return;
-    }
+  const openDeleteDialog = (id: string) => {
+    setSelectedAnalysis(id);
+    setDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setSelectedAnalysis(null);
+    setDialogOpen(false);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedAnalysis) return;
 
     setIsLoading(true);
     setError(null);
@@ -52,17 +62,17 @@ const UserDashboard: React.FC = () => {
     const { error } = await supabase
       .from('pdf_analyses')
       .delete()
-      .eq('id', id);
+      .eq('id', selectedAnalysis);
 
     if (error) {
       console.error('Error deleting analysis:', error);
       setError('Failed to delete analysis. Please try again.');
     } else {
-      // Refresh the analyses list after successful deletion
       await fetchAnalyses();
     }
 
     setIsLoading(false);
+    closeDeleteDialog();
   };
 
   if (isLoading) {
@@ -101,7 +111,7 @@ const UserDashboard: React.FC = () => {
             {analyses.map((analysis) => (
               <div key={analysis.id} className="bg-white shadow rounded-lg p-6 relative">
                 <button 
-                  onClick={() => handleDelete(analysis.id)}
+                  onClick={() => openDeleteDialog(analysis.id)}
                   className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                   aria-label="Delete analysis"
                 >
@@ -124,6 +134,13 @@ const UserDashboard: React.FC = () => {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        isOpen={dialogOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={handleDelete}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this analysis? This action cannot be undone."
+      />
     </Layout>
   );
 };
