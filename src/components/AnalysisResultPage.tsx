@@ -8,32 +8,38 @@ import LoadingAnimation from './LoadingAnimation';
 const AnalysisResultPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [analysisResult, setAnalysisResult] = useState(location.state?.analysisResult || null);
-  const [isLoading, setIsLoading] = useState(location.state?.isLoading || false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const saveAnalysisResult = async () => {
-      if (analysisResult && !isLoading) {
+      if (location.state?.analysisResult) {
+        setAnalysisResult(location.state.analysisResult);
         const { data: { session } } = await supabase.auth.getSession();
         const user = session?.user;
         if (user) {
-          const { error } = await supabase.from('pdf_analyses').insert({
-            user_id: user.id,
-            pdf_name: location.state?.pdfName || 'Unnamed PDF',
-            analysis_result: analysisResult,
-          });
+          try {
+            const { error: insertError } = await supabase.from('pdf_analyses').insert({
+              user_id: user.id,
+              pdf_name: location.state?.pdfName || 'Unnamed PDF',
+              analysis_result: location.state.analysisResult,
+            });
 
-          if (error) {
-            console.error('Error saving analysis result:', error);
+            if (insertError) throw insertError;
+          } catch (err) {
+            console.error('Error saving analysis result:', err);
             setError('Failed to save analysis result');
           }
         }
+      } else {
+        setError('No analysis result available');
       }
+      setIsLoading(false);
     };
 
     saveAnalysisResult();
-  }, [analysisResult, isLoading, location.state]);
+  }, [location.state]);
 
   if (isLoading) {
     return (
