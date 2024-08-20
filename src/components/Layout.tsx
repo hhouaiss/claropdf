@@ -10,12 +10,25 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/user-dashboard`,
+        redirectTo: window.location.origin + '/user-dashboard'
       }
     });
     if (error) console.error('Error logging in:', error);
@@ -24,6 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) console.error('Error logging out:', error);
+    else navigate('/');
   };
 
   return (
@@ -46,20 +60,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <a href="mailto:hello@claropdf.com" target="_blank" rel="noopener noreferrer">Contact</a>
               </li>
               <li>
-                <button
-                  onClick={handleLogin}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Login with Google
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Logout
-                </button>
+                {session ? (
+                  <button
+                    onClick={handleLogout}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleLogin}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Login with Google
+                  </button>
+                )}
               </li>
             </ul>
           </nav>
