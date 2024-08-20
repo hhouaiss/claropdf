@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import Layout from './Layout';
@@ -39,6 +39,20 @@ const UserDashboard: React.FC = () => {
     setIsLoading(false);
   };
 
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('pdf_analyses')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting analysis:', error);
+      setError('Failed to delete analysis. Please try again.');
+    } else {
+      setAnalyses(analyses.filter(analysis => analysis.id !== id));
+    }
+  };
+
   if (isLoading) {
     return <Layout><div className="container mx-auto p-4">Loading...</div></Layout>;
   }
@@ -61,7 +75,16 @@ const UserDashboard: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {analyses.map((analysis) => (
-              <div key={analysis.id} className="bg-white shadow rounded-lg p-6">
+              <div key={analysis.id} className="bg-white shadow rounded-lg p-6 relative">
+                <button 
+                  onClick={() => handleDelete(analysis.id)}
+                  className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                  aria-label="Delete analysis"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
                 <h2 className="text-xl font-semibold mb-2">{analysis.pdf_name}</h2>
                 <p className="text-gray-600 mb-4">
                   Analyzed on: {new Date(analysis.created_at).toLocaleDateString()}
