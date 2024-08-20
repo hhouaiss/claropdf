@@ -34,7 +34,7 @@ const App: React.FC = () => {
     <HelmetProvider>
       <Router>
         <Routes>
-          <Route path="/" element={
+        <Route path="/" element={
           session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
         } />
           <Route path="/blog" element={<BlogListingPage />} />
@@ -42,11 +42,12 @@ const App: React.FC = () => {
           <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route path="/analysis/:id" element={<AnalysisResultPage />} />
           <Route path="/analysis-result/:shareId" element={<AnalysisResultPage />} />
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          {/* <Route 
-            path="/user-dashboard" 
-            element={session ? <UserDashboard /> : <Navigate to="/" replace />} 
-          /> */}
+          <Route 
+          path="/user-dashboard" 
+          element={
+            session ? <UserDashboard /> : <Navigate to="/" replace />
+          } 
+        />
         </Routes>
       </Router>
     </HelmetProvider>
