@@ -4,6 +4,7 @@ import { analyzePDF, extractTextFromPDF } from '../services/api';
 import FileUpload from './FileUpload';
 import Layout from './Layout';
 import { DocumentTextIcon, ChartBarIcon, LightBulbIcon } from '@heroicons/react/outline';
+import LoadingAnimation from './LoadingAnimation';
 
 const DataClaro: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -55,6 +56,9 @@ const DataClaro: React.FC = () => {
       </div>
 
       <div className="text-center">
+      {isAnalyzing ? (
+        <LoadingAnimation />
+      ) : (
         <button 
           onClick={analyzeDocument}
           disabled={!file}
@@ -62,6 +66,7 @@ const DataClaro: React.FC = () => {
         >
           Analyze Document
         </button>
+      )}
       </div>
       
       {error && (

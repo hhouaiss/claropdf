@@ -8,7 +8,7 @@ import LoadingAnimation from './LoadingAnimation';
 const AnalysisResultPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id?: string }>();
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [pdfName, setPdfName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -25,13 +25,18 @@ const AnalysisResultPage: React.FC = () => {
           .single();
 
         if (error) {
+          console.error('Error fetching analysis:', error);
           setError('Failed to fetch analysis');
           setIsLoading(false);
           return;
         }
 
-        setAnalysisResult(data.analysis_result);
-        setPdfName(data.pdf_name);
+        if (data) {
+          setAnalysisResult(data.analysis_result);
+          setPdfName(data.pdf_name);
+        } else {
+          setError('Analysis not found');
+        }
       } else if (location.state?.analysisResult) {
         // New analysis
         setAnalysisResult(location.state.analysisResult);
@@ -98,12 +103,6 @@ const AnalysisResultPage: React.FC = () => {
 
   return (
     <Layout>
-      <button
-          onClick={() => navigate('/')}
-          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Return to Home
-        </button>
       <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
       <Dashboard analysisResult={analysisResult} />
       <button
