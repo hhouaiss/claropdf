@@ -8,6 +8,7 @@ import { DocumentTextIcon, ChartBarIcon, LightBulbIcon } from '@heroicons/react/
 const DataClaro: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const navigate = useNavigate();
 
   const handleFileUpload = (uploadedFile: File) => {
@@ -19,11 +20,11 @@ const DataClaro: React.FC = () => {
     if (!file) return;
 
     setError(null);
+    setIsAnalyzing(true);
     try {
       const text = await extractTextFromPDF(file);
       const result = await analyzePDF(text);
       
-      // Navigate to the analysis result page with the result
       navigate('/analysis-result', { 
         state: { 
           analysisResult: result,
@@ -33,6 +34,7 @@ const DataClaro: React.FC = () => {
     } catch (error: any) {
       console.error('Error analyzing document:', error);
       setError(`Error: ${error.message}`);
+      setIsAnalyzing(false);
     }
   };
 

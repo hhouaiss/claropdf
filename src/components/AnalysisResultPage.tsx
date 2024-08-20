@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import Dashboard from './Dashboard';
 import Layout from './Layout';
@@ -8,45 +8,57 @@ import LoadingAnimation from './LoadingAnimation';
 const AnalysisResultPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [pdfName, setPdfName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const saveAnalysisResult = async () => {
-      console.log('Location state:', location.state);
-      if (location.state?.analysisResult) {
-        console.log('Analysis result found:', location.state.analysisResult);
+    const fetchAnalysis = async () => {
+      if (id) {
+        // Fetch saved analysis
+        const { data, error } = await supabase
+          .from('pdf_analyses')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          setError('Failed to fetch analysis');
+          setIsLoading(false);
+          return;
+        }
+
+        setAnalysisResult(data.analysis_result);
+        setPdfName(data.pdf_name);
+      } else if (location.state?.analysisResult) {
+        // New analysis
         setAnalysisResult(location.state.analysisResult);
+        setPdfName(location.state.pdfName || 'Unnamed PDF');
+        
+        // Save new analysis
         const { data: { session } } = await supabase.auth.getSession();
         const user = session?.user;
         if (user) {
-          try {
-            const { error: insertError } = await supabase.from('pdf_analyses').insert({
-              user_id: user.id,
-              pdf_name: location.state?.pdfName || 'Unnamed PDF',
-              analysis_result: location.state.analysisResult,
-            });
+          const { error: insertError } = await supabase.from('pdf_analyses').insert({
+            user_id: user.id,
+            pdf_name: location.state.pdfName || 'Unnamed PDF',
+            analysis_result: location.state.analysisResult,
+          });
 
-            if (insertError) throw insertError;
-            console.log('Analysis saved successfully');
-          } catch (err) {
-            console.error('Error saving analysis result:', err);
-            setError('Failed to save analysis result');
+          if (insertError) {
+            console.error('Error saving analysis result:', insertError);
           }
-        } else {
-          console.log('No user found in session');
-          setError('User not authenticated');
         }
       } else {
-        console.log('No analysis result in location state');
         setError('No analysis result available');
       }
       setIsLoading(false);
     };
 
-    saveAnalysisResult();
-  }, [location.state]);
+    fetchAnalysis();
+  }, [id, location.state]);
 
   if (isLoading) {
     return (
@@ -86,6 +98,7 @@ const AnalysisResultPage: React.FC = () => {
 
   return (
     <Layout>
+      <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
       <Dashboard analysisResult={analysisResult} />
       <button
         onClick={() => navigate('/')}

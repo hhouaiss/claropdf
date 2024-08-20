@@ -33,10 +33,11 @@ const App: React.FC = () => {
           <Route path="/blog/:slug" element={<ArticlePage />} />
           <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route path="/analysis-result/:shareId" element={<AnalysisResultPage />} />
-          <Route 
+          <Route path="/user-dashboard" element={<UserDashboard />} />
+          {/* <Route 
             path="/user-dashboard" 
             element={session ? <UserDashboard /> : <Navigate to="/" replace />} 
-          />
+          /> */}
         </Routes>
       </Router>
     </HelmetProvider>
