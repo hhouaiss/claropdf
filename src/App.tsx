@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import DataClaro from './components/DataClaro';
 import { Session } from '@supabase/supabase-js';
@@ -9,45 +9,46 @@ import AnalysisResultPage from './components/AnalysisResultPage';
 import UserDashboard from './components/UserDashboard';
 import { supabase } from './services/supabase';
 
-const App: React.FC = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
+  const navigate = useNavigate();
+  const [isAuth, setIsAuth] = useState<boolean | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
+      setIsAuth(!!session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+      setIsAuth(!!session);
+      if (session) {
+        navigate('/user-dashboard', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
-  if (loading) {
+  if (isAuth === null) {
     return <div>Loading...</div>;
   }
 
+  return <>{children}</>;
+};
+
+const App: React.FC = () => {
   return (
     <HelmetProvider>
       <Router>
         <Routes>
-        <Route path="/" element={
-          session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
-        } />
+          <Route path="/" element={<DataClaro />} />
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<ArticlePage />} />
           <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route path="/analysis/:id" element={<AnalysisResultPage />} />
           <Route path="/analysis-result/:shareId" element={<AnalysisResultPage />} />
-          <Route 
-          path="/user-dashboard" 
-          element={
-            session ? <UserDashboard /> : <Navigate to="/" replace />
-          } 
-        />
+          <Route path="/user-dashboard" element={<UserDashboard />} />
         </Routes>
       </Router>
     </HelmetProvider>
