@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import Footer from './Footer';
@@ -9,7 +9,6 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -25,19 +24,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/user-dashboard'
-      }
     });
-    if (error) console.error('Error logging in:', error);
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Error logging out:', error);
-    else navigate('/');
+    await supabase.auth.signOut();
   };
 
   return (
@@ -59,23 +52,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <li className="text-gray-600 hover:text-gray-900">
                 <a href="mailto:hello@claropdf.com" target="_blank" rel="noopener noreferrer">Contact</a>
               </li>
-              <li>
-                {session ? (
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    Logout
-                  </button>
-                ) : (
+              {session ? (
+                <>
+                  <li className="text-gray-600 hover:text-gray-900">
+                    <Link to="/user-dashboard">Dashboard</Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={handleLogout}
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <li>
                   <button
                     onClick={handleLogin}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                   >
                     Login with Google
                   </button>
-                )}
-              </li>
+                </li>
+              )}
             </ul>
           </nav>
         </div>
