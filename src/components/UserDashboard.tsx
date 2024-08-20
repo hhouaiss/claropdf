@@ -20,6 +20,7 @@ const UserDashboard: React.FC = () => {
 
   const fetchAnalyses = async () => {
     setIsLoading(true);
+    setError(null);
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
     if (user) {
@@ -40,6 +41,14 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
+    // Confirm before deleting
+    if (!window.confirm('Are you sure you want to delete this analysis? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
     const { error } = await supabase
       .from('pdf_analyses')
       .delete()
@@ -49,8 +58,11 @@ const UserDashboard: React.FC = () => {
       console.error('Error deleting analysis:', error);
       setError('Failed to delete analysis. Please try again.');
     } else {
-      setAnalyses(analyses.filter(analysis => analysis.id !== id));
+      // Refresh the analyses list after successful deletion
+      await fetchAnalyses();
     }
+
+    setIsLoading(false);
   };
 
   if (isLoading) {
@@ -58,7 +70,19 @@ const UserDashboard: React.FC = () => {
   }
 
   if (error) {
-    return <Layout><div className="container mx-auto p-4 text-red-600">{error}</div></Layout>;
+    return (
+      <Layout>
+        <div className="container mx-auto p-4">
+          <div className="text-red-600 mb-4">{error}</div>
+          <button 
+            onClick={fetchAnalyses} 
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Retry
+          </button>
+        </div>
+      </Layout>
+    );
   }
 
   return (
