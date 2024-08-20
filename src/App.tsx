@@ -34,7 +34,9 @@ const App: React.FC = () => {
     <HelmetProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<DataClaro />} />
+        <Route path="/" element={
+          session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
+        } />
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<ArticlePage />} />
           <Route path="/analysis-result" element={<AnalysisResultPage />} />
