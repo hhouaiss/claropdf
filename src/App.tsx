@@ -11,10 +11,12 @@ import { supabase } from './services/supabase';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -24,21 +26,28 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <HelmetProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<DataClaro />} />
+        <Route path="/" element={
+          session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
+        } />
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<ArticlePage />} />
           <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route path="/analysis/:id" element={<AnalysisResultPage />} />
           <Route path="/analysis-result/:shareId" element={<AnalysisResultPage />} />
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          {/* <Route 
-            path="/user-dashboard" 
-            element={session ? <UserDashboard /> : <Navigate to="/" replace />} 
-          /> */}
+          <Route 
+          path="/user-dashboard" 
+          element={
+            session ? <UserDashboard /> : <Navigate to="/" replace />
+          } 
+        />
         </Routes>
       </Router>
     </HelmetProvider>
