@@ -27,7 +27,7 @@ const UploadCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-300 shadow rounded-lg p-6 h-full flex flex-col justify-between border-2">
+    <div className="bg-white shadow rounded-lg p-6 h-full flex flex-col justify-between">
       <h2 className="text-xl font-semibold mb-4">Upload New PDF</h2>
       {isLoading ? (
         <LoadingAnimation />
