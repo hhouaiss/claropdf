@@ -48,8 +48,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
 
   return (
     <div 
-      className={`w-full h-full flex items-center justify-center ${
-        dragActive ? "bg-blue-50" : ""
+      className={`border-2 border-dashed rounded-lg p-6 text-center ${
+        dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
       }`}
       onDragEnter={handleDrag}
       onDragLeave={handleDrag}
@@ -63,15 +63,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
         accept=".pdf,.csv"
         onChange={handleChange}
       />
-      <div className="text-center">
-        <p className="mb-2">Drag and drop your PDF here, or</p>
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={onButtonClick}
-        >
-          Select File
-        </button>
-      </div>
+      <p className="mb-2">Drag and drop your PDF here, or</p>
+      <button
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        onClick={onButtonClick}
+      >
+        Select File
+      </button>
     </div>
   );
 };
