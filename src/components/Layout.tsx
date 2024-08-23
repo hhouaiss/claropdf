@@ -6,45 +6,69 @@ import Footer from './Footer';
 import { Menu, X } from 'lucide-react';
 
 interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
-  const [session, setSession] = useState<Session | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/user-dashboard'
-      }
-    });
-    if (error) console.error('Error logging in:', error);
-  };
-
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Error logging out:', error);
-    else navigate('/');
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+	children: React.ReactNode;
+  }
+  
+  const Layout: React.FC<LayoutProps> = ({ children }) => {
+	const navigate = useNavigate();
+	const [session, setSession] = useState<Session | null>(null);
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+	useEffect(() => {
+	  supabase.auth.getSession().then(({ data: { session } }) => {
+		setSession(session);
+	  });
+  
+	  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+		setSession(session);
+		if (session) {
+		  navigate('/user-dashboard');
+		}
+	  });
+  
+	  return () => subscription.unsubscribe();
+	}, [navigate]);
+  
+	const handleLogin = async () => {
+	  try {
+		const { error } = await supabase.auth.signInWithOAuth({
+		  provider: 'google',
+		  options: {
+			redirectTo: `${window.location.origin}/auth/callback`,
+			skipBrowserRedirect: true,
+		  }
+		});
+		
+		if (error) throw error;
+  
+		const { data, error: authError } = await supabase.auth.getSession();
+		if (authError) throw authError;
+  
+		if (data.session) {
+		  setSession(data.session);
+		  navigate('/user-dashboard');
+		}
+	  } catch (error) {
+		console.error('Error logging in:', error);
+		// Here you might want to show an error message to the user
+	  }
+	};
+  
+	const handleLogout = async () => {
+	  try {
+		const { error } = await supabase.auth.signOut();
+		if (error) throw error;
+		setSession(null);
+		navigate('/');
+	  } catch (error) {
+		console.error('Error logging out:', error);
+		// Here you might want to show an error message to the user
+	  }
+	};
+  
+	const toggleMenu = () => {
+	  setIsMenuOpen(!isMenuOpen);
+	};
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
