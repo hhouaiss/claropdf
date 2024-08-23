@@ -35,12 +35,12 @@ const App: React.FC = () => {
     <HelmetProvider>
       <Router>
         <Routes>
-        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/" element={
           session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
         } />
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<ArticlePage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route path="/analysis/:id" element={<AnalysisResultPage />} />
           <Route path="/analysis-result/:shareId" element={<AnalysisResultPage />} />
