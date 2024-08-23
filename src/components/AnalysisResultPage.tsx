@@ -16,6 +16,9 @@ const AnalysisResultPage: React.FC = () => {
 
   useEffect(() => {
     const fetchAnalysis = async () => {
+      setIsLoading(true);
+      setError(null);
+
       if (id) {
         // Fetch saved analysis
         const { data, error } = await supabase
@@ -78,10 +81,10 @@ const AnalysisResultPage: React.FC = () => {
       <Layout>
         <div className="text-red-600">{error}</div>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/user-dashboard')}
           className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          Return to Home
+          Return to Dashboard
         </button>
       </Layout>
     );
@@ -90,12 +93,12 @@ const AnalysisResultPage: React.FC = () => {
   if (!analysisResult) {
     return (
       <Layout>
-        <div>No analysis result available. Please return to the home page and try again.</div>
+        <div>No analysis result available. Please return to the dashboard and try again.</div>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/user-dashboard')}
           className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          Return to Home
+          Return to Dashboard
         </button>
       </Layout>
     );
@@ -103,19 +106,13 @@ const AnalysisResultPage: React.FC = () => {
 
   return (
     <Layout>
-      <button
-          onClick={() => navigate('/')}
-          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Return to Home
-        </button>
       <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
       <Dashboard analysisResult={analysisResult} />
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/user-dashboard')}
         className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
-        Analyze Another PDF
+        Return to Dashboard
       </button>
     </Layout>
   );

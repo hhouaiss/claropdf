@@ -8,7 +8,7 @@ import ArticlePage from './components/blog/ArticlePage';
 import AnalysisResultPage from './components/AnalysisResultPage';
 import UserDashboard from './components/UserDashboard';
 import { supabase } from './services/supabase';
-// import AuthCallback from './components/callback';
+import AuthCallback from './components/callback';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -35,21 +35,20 @@ const App: React.FC = () => {
     <HelmetProvider>
       <Router>
         <Routes>
-        <Route path="/" element={
-          session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
-        } />
+          <Route path="/" element={
+            session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
+          } />
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<ArticlePage />} />
-          <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route path="/analysis/:id" element={<AnalysisResultPage />} />
-          <Route path="/analysis-result/:shareId" element={<AnalysisResultPage />} />
+          <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route 
-          path="/user-dashboard" 
-          element={
-            session ? <UserDashboard /> : <Navigate to="/" replace />
-          } 
-        />
-        {/* <Route path="/auth/callback" element={<AuthCallback />} /> */}
+            path="/user-dashboard" 
+            element={
+              session ? <UserDashboard /> : <Navigate to="/" replace />
+            } 
+          />
+          <Route path="/auth/callback" element={<AuthCallback />} />
         </Routes>
       </Router>
     </HelmetProvider>
