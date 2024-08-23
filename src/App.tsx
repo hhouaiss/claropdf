@@ -48,7 +48,7 @@ const App: React.FC = () => {
               session ? <UserDashboard /> : <Navigate to="/" replace />
             } 
           />
-          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/callback" element={<AuthCallback />} />
         </Routes>
       </Router>
     </HelmetProvider>
