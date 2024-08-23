@@ -5,6 +5,7 @@ import DataClaro from './components/DataClaro';
 import { Session } from '@supabase/supabase-js';
 import BlogListingPage from './components/blog/BlogListingPage';
 import ArticlePage from './components/blog/ArticlePage';
+import AuthCallback from './auth/callback';
 import AnalysisResultPage from './components/AnalysisResultPage';
 import UserDashboard from './components/UserDashboard';
 import { supabase } from './services/supabase';
@@ -34,6 +35,7 @@ const App: React.FC = () => {
     <HelmetProvider>
       <Router>
         <Routes>
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/" element={
           session ? <Navigate to="/user-dashboard" replace /> : <DataClaro />
         } />
