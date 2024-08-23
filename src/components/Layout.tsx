@@ -27,19 +27,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   const handleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/user-dashboard',
-        }
-      });
-      
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error logging in:', error);
-      // Here you might want to show an error message to the user
-    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/user-dashboard'
+      }
+    });
+    if (error) console.error('Error logging in:', error);
   };
 
   const handleLogout = async () => {
