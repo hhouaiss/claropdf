@@ -5,7 +5,7 @@ import DataClaro from './components/DataClaro';
 import { Session } from '@supabase/supabase-js';
 import BlogListingPage from './components/blog/BlogListingPage';
 import ArticlePage from './components/blog/ArticlePage';
-import AuthCallback from './auth/callback';
+import AuthCallback from './components/callback';
 import AnalysisResultPage from './components/AnalysisResultPage';
 import UserDashboard from './components/UserDashboard';
 import { supabase } from './services/supabase';

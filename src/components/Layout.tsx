@@ -34,20 +34,11 @@ interface LayoutProps {
 		const { error } = await supabase.auth.signInWithOAuth({
 		  provider: 'google',
 		  options: {
-			redirectTo: `${window.location.origin}/auth/v1/callback`,
-			skipBrowserRedirect: true,
+			redirectTo: `${window.location.origin}/auth/callback`,
 		  }
 		});
 		
 		if (error) throw error;
-  
-		const { data, error: authError } = await supabase.auth.getSession();
-		if (authError) throw authError;
-  
-		if (data.session) {
-		  setSession(data.session);
-		  navigate('/user-dashboard');
-		}
 	  } catch (error) {
 		console.error('Error logging in:', error);
 		// Here you might want to show an error message to the user
