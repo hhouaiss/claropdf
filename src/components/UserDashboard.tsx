@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import Layout from './Layout';
 import UploadCard from './UploadCard';
@@ -13,6 +13,7 @@ interface PdfAnalysis {
 
 const UserDashboard: React.FC = () => {
   const [analyses, setAnalyses] = useState<PdfAnalysis[]>([]);
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -21,6 +22,22 @@ const UserDashboard: React.FC = () => {
   useEffect(() => {
     fetchAnalyses();
   }, []);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/');
+      }
+      setIsLoading(false);
+    };
+
+    checkSession();
+  }, [navigate]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   const fetchAnalyses = async () => {
     setIsLoading(true);
