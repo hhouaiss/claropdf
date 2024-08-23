@@ -125,7 +125,7 @@ const UserDashboard: React.FC = () => {
                   Analyzed on: {new Date(analysis.created_at).toLocaleDateString()}
                 </p>
                 <Link
-                  to={`/analysis/${analysis.id}`}
+                  to={`/analysis_result/${analysis.id}`}
                   className="bg-blue-500 hover:bg-blue-700 text-white text-center font-bold py-2 px-4 rounded"
                 >
                   View Analysis
