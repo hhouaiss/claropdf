@@ -57,26 +57,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </svg>
           </Link>
           
-          {/* Desktop navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          {/* Desktop navigation and login/logout */}
+          <div className="hidden md:flex items-center space-x-6">
             <Link to="/blog" className="text-gray-600 hover:text-gray-900">Blog</Link>
             <a href="mailto:hello@claropdf.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900">Contact</a>
             {session && (
               <Link to="/user-dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
             )}
-          </nav>
-
-          <div className="flex items-center">
-            {/* Burger menu button (visible on mobile) */}
-            <button
-              className="md:hidden mr-4 text-gray-600 hover:text-gray-900"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-
-            {/* Login/Logout buttons (always visible) */}
             {session ? (
               <button
                 onClick={handleLogout}
@@ -92,6 +79,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Login
               </button>
             )}
+          </div>
+
+          {/* Mobile login and menu button */}
+          <div className="flex items-center md:hidden">
+            {session ? (
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-4"
+              >
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={handleLogin}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4"
+              >
+                Login
+              </button>
+            )}
+            <button
+              className="text-gray-600 hover:text-gray-900"
+              onClick={toggleMenu}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
 
