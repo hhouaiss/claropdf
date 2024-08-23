@@ -40,7 +40,6 @@ const App: React.FC = () => {
         } />
           <Route path="/blog" element={<BlogListingPage />} />
           <Route path="/blog/:slug" element={<ArticlePage />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/analysis-result" element={<AnalysisResultPage />} />
           <Route path="/analysis/:id" element={<AnalysisResultPage />} />
           <Route path="/analysis-result/:shareId" element={<AnalysisResultPage />} />
@@ -50,6 +49,7 @@ const App: React.FC = () => {
             session ? <UserDashboard /> : <Navigate to="/" replace />
           } 
         />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         </Routes>
       </Router>
     </HelmetProvider>
