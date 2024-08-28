@@ -1,12 +1,15 @@
 import React from 'react';
 import { supabase } from '../services/supabase';
+import { useLocation } from 'react-router-dom';
 
 const LoginPrompt: React.FC = () => {
+  const location = useLocation();
+
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/user-dashboard',
+        redirectTo: `${window.location.origin}/auth/callback?redirectUrl=${encodeURIComponent(location.pathname + location.search)}`,
       }
     });
     

@@ -1,19 +1,27 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const handleAuthCallback = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const params = new URLSearchParams(location.search);
+      const redirectUrl = params.get('redirectUrl') || '/user-dashboard';
+
       if (session) {
-        navigate('/user-dashboard');
+        navigate(redirectUrl);
       } else {
         navigate('/');
       }
-    });
-  }, [navigate]);
+    };
+
+    handleAuthCallback();
+  }, [navigate, location]);
 
   return null; // This component doesn't render anything
 };
