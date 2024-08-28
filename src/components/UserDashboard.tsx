@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 import Layout from './Layout';
 import UploadCard from './UploadCard';
 import ConfirmDialog from './ConfirmDialog';
+import { FileText, Trash2, Search } from 'lucide-react';
 
 interface PdfAnalysis {
   id: string;
@@ -13,14 +14,24 @@ interface PdfAnalysis {
 
 const UserDashboard: React.FC = () => {
   const [analyses, setAnalyses] = useState<PdfAnalysis[]>([]);
+  const [filteredAnalyses, setFilteredAnalyses] = useState<PdfAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchAnalyses();
   }, []);
+
+  useEffect(() => {
+    setFilteredAnalyses(
+      analyses.filter(analysis => 
+        analysis.pdf_name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [searchTerm, analyses]);
 
   const fetchAnalyses = async () => {
     setIsLoading(true);
@@ -76,60 +87,61 @@ const UserDashboard: React.FC = () => {
     closeDeleteDialog();
   };
 
-  if (isLoading) {
-    return <Layout><div className="container mx-auto p-4">Loading...</div></Layout>;
-  }
-
-  if (error) {
-    return (
-      <Layout>
-        <div className="container mx-auto p-4">
-          <div className="text-red-600 mb-4">{error}</div>
-          <button 
-            onClick={fetchAnalyses} 
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Retry
-          </button>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-6">Your PDF Analyses</h1>
-        {analyses.length === 0 ? (
-          <div>
-            <p>You haven't analyzed any PDFs yet.</p>
-            <Link to="/" className="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        
+        <div className="mb-6 relative">
+          <input
+            type="text"
+            placeholder="Search analyses..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg pl-10"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        </div>
+
+        {isLoading ? (
+          <div className="text-center">Loading your analyses...</div>
+        ) : error ? (
+          <div className="text-red-600 mb-4">{error}</div>
+        ) : filteredAnalyses.length === 0 ? (
+          <div className="text-center">
+            <p className="mb-4">You haven't analyzed any PDFs yet.</p>
+            <Link to="/" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-block">
               Analyze Your First PDF
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {analyses.map((analysis) => (
-              <div key={analysis.id} className="bg-white shadow rounded-lg p-6 flex flex-col justify-between relative h-full">
-                <button 
-                  onClick={() => openDeleteDialog(analysis.id)}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                  aria-label="Delete analysis"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-                <h2 className="text-xl font-semibold mb-2">{analysis.pdf_name}</h2>
-                <p className="text-gray-600 mb-4">
-                  Analyzed on: {new Date(analysis.created_at).toLocaleDateString()}
-                </p>
-                <Link
-                  to={`/analysis/${analysis.id}`}
-                  className="bg-blue-500 hover:bg-blue-700 text-white text-center font-bold py-2 px-4 rounded"
-                >
-                  View Analysis
-                </Link>
+            {filteredAnalyses.map((analysis) => (
+              <div key={analysis.id} className="bg-white shadow rounded-lg p-6 flex flex-col justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2 flex items-center">
+                    <FileText className="mr-2" size={20} />
+                    {analysis.pdf_name}
+                  </h2>
+                  <p className="text-gray-600 mb-4">
+                    Analyzed on: {new Date(analysis.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <Link
+                    to={`/analysis/${analysis.id}`}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    View Analysis
+                  </Link>
+                  <button
+                    onClick={() => openDeleteDialog(analysis.id)}
+                    className="text-red-500 hover:text-red-700"
+                    aria-label="Delete analysis"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
             ))}
             <UploadCard />
