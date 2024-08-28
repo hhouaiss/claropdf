@@ -6,6 +6,8 @@ import Layout from './Layout';
 import { Download, Share2, ChevronLeft, FileText, LayoutDashboard } from 'lucide-react';
 import LoadingAnimation from './LoadingAnimation';
 import DownloadShareButtons from './DownloadShareButtons';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const AnalysisResultPage: React.FC = () => {
 	const location = useLocation();
@@ -16,6 +18,7 @@ const AnalysisResultPage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [showRawData, setShowRawData] = useState(false);
+	const [isShared, setIsShared] = useState(false);
 	
 	useEffect(() => {
 		const fetchAnalysis = async () => {
@@ -68,6 +71,48 @@ const AnalysisResultPage: React.FC = () => {
 		fetchAnalysis();
 	}, [id, location.state]);
 	
+	const handleDownload = async () => {
+		const element = document.getElementById('dashboard-content');
+		if (!element) {
+			console.error('Dashboard content not found');
+			return;
+		}
+		
+		try {
+			const canvas = await html2canvas(element, {
+				scale: 2,
+				logging: false,
+				useCORS: true
+			});
+			const imgData = canvas.toDataURL('image/png');
+			
+			const pdf = new jsPDF({
+				orientation: 'portrait',
+				unit: 'px',
+				format: [canvas.width, canvas.height]
+			});
+			
+			pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+			pdf.save(`${pdfName}_analysis.pdf`);
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			// You might want to show an error message to the user here
+		}
+	};
+	
+	const handleShare = async () => {
+		const shareableLink = `${window.location.origin}/analysis/${id}`;
+		
+		try {
+			await navigator.clipboard.writeText(shareableLink);
+			setIsShared(true);
+			setTimeout(() => setIsShared(false), 2000);
+		} catch (err) {
+			console.error('Failed to copy: ', err);
+			// You might want to show an error message to the user here
+		}
+	};
+	
 	if (isLoading) {
 		return (
 			<Layout>
@@ -115,13 +160,25 @@ const AnalysisResultPage: React.FC = () => {
 		<div className="container mx-auto px-4 py-8">
 		<div className="flex justify-between items-center mb-6">
 		<h1 className="text-3xl font-bold">Analysis Result: {pdfName}</h1>
-		<DownloadShareButtons analysisResult={analysisResult} pdfName={pdfName} />
 		<div className="flex space-x-4">
-		<button className="text-gray-500 hover:text-gray-700 transition-colors" aria-label="Download">
+		<button 
+		onClick={handleDownload}
+		className="text-gray-500 hover:text-gray-700 transition-colors" 
+		aria-label="Download"
+		>
 		<Download size={24} />
 		</button>
-		<button className="text-gray-500 hover:text-gray-700 transition-colors" aria-label="Share">
+		<button 
+		onClick={handleShare}
+		className="text-gray-500 hover:text-gray-700 transition-colors relative" 
+		aria-label="Share"
+		>
 		<Share2 size={24} />
+		{isShared && (
+			<span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded">
+			Link copied!
+			</span>
+		)}
 		</button>
 		</div>
 		</div>
@@ -141,8 +198,14 @@ const AnalysisResultPage: React.FC = () => {
 			{JSON.stringify(analysisResult, null, 2)}
 			</pre>
 		) : (
-			<div id="analysis-content">
+			<div id="dashboard-content">
+			{showRawData ? (
+				<pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
+				{JSON.stringify(analysisResult, null, 2)}
+				</pre>
+			) : (
 				<Dashboard analysisResult={analysisResult} />
+			)}
 			</div>
 		)}
 		
