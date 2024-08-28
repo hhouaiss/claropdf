@@ -5,6 +5,7 @@ import Dashboard from './Dashboard';
 import Layout from './Layout';
 import { Download, Share2, ChevronLeft, FileText, LayoutDashboard } from 'lucide-react';
 import LoadingAnimation from './LoadingAnimation';
+import DownloadShareButtons from './DownloadShareButtons';
 
 const AnalysisResultPage: React.FC = () => {
 	const location = useLocation();
@@ -114,6 +115,7 @@ const AnalysisResultPage: React.FC = () => {
 		<div className="container mx-auto px-4 py-8">
 		<div className="flex justify-between items-center mb-6">
 		<h1 className="text-3xl font-bold">Analysis Result: {pdfName}</h1>
+		<DownloadShareButtons analysisResult={analysisResult} pdfName={pdfName} />
 		<div className="flex space-x-4">
 		<button className="text-gray-500 hover:text-gray-700 transition-colors" aria-label="Download">
 		<Download size={24} />
@@ -139,7 +141,9 @@ const AnalysisResultPage: React.FC = () => {
 			{JSON.stringify(analysisResult, null, 2)}
 			</pre>
 		) : (
-			<Dashboard analysisResult={analysisResult} />
+			<div id="analysis-content">
+				<Dashboard analysisResult={analysisResult} />
+			</div>
 		)}
 		
 		<div className="mt-8 flex justify-between items-center">
