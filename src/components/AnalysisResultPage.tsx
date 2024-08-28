@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 import Dashboard from './Dashboard';
 import Layout from './Layout';
 import LoadingAnimation from './LoadingAnimation';
+import LoginPrompt from './LoginPrompt';
 
 const AnalysisResultPage: React.FC = () => {
   const location = useLocation();
@@ -13,9 +14,16 @@ const AnalysisResultPage: React.FC = () => {
   const [pdfName, setPdfName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+
       if (id) {
         // Fetch saved analysis
         const { data, error } = await supabase
@@ -42,12 +50,10 @@ const AnalysisResultPage: React.FC = () => {
         setAnalysisResult(location.state.analysisResult);
         setPdfName(location.state.pdfName || 'Unnamed PDF');
         
-        // Save new analysis
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (user) {
+        // Save new analysis if authenticated
+        if (session) {
           const { error: insertError } = await supabase.from('pdf_analyses').insert({
-            user_id: user.id,
+            user_id: session.user.id,
             pdf_name: location.state.pdfName || 'Unnamed PDF',
             analysis_result: location.state.analysisResult,
           });
@@ -78,24 +84,10 @@ const AnalysisResultPage: React.FC = () => {
       <Layout>
         <div className="text-red-600">{error}</div>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/user-dashboard')}
           className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          Return to Home
-        </button>
-      </Layout>
-    );
-  }
-
-  if (!analysisResult) {
-    return (
-      <Layout>
-        <div>No analysis result available. Please return to the home page and try again.</div>
-        <button
-          onClick={() => navigate('/')}
-          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Return to Home
+          Return to Dashboard
         </button>
       </Layout>
     );
@@ -103,14 +95,11 @@ const AnalysisResultPage: React.FC = () => {
 
   return (
     <Layout>
-      <button
-          onClick={() => navigate('/')}
-          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Return to Home
-        </button>
-      <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
-      <Dashboard analysisResult={analysisResult} />
+      <div className="relative">
+        <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
+        <Dashboard analysisResult={analysisResult} isAuthenticated={isAuthenticated} />
+        {!isAuthenticated && <LoginPrompt />}
+      </div>
       <button
         onClick={() => navigate('/')}
         className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
