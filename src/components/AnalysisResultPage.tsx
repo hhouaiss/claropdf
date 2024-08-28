@@ -4,7 +4,6 @@ import { supabase } from '../services/supabase';
 import Dashboard from './Dashboard';
 import Layout from './Layout';
 import LoadingAnimation from './LoadingAnimation';
-import LoginPrompt from './LoginPrompt';
 
 const AnalysisResultPage: React.FC = () => {
   const location = useLocation();
@@ -14,17 +13,9 @@ const AnalysisResultPage: React.FC = () => {
   const [pdfName, setPdfName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-
-      let analysisData;
       if (id) {
         // Fetch saved analysis
         const { data, error } = await supabase
@@ -40,35 +31,34 @@ const AnalysisResultPage: React.FC = () => {
           return;
         }
 
-        analysisData = data;
+        if (data) {
+          setAnalysisResult(data.analysis_result);
+          setPdfName(data.pdf_name);
+        } else {
+          setError('Analysis not found');
+        }
       } else if (location.state?.analysisResult) {
         // New analysis
-        analysisData = {
-          analysis_result: location.state.analysisResult,
-          pdf_name: location.state.pdfName || 'Unnamed PDF'
-        };
+        setAnalysisResult(location.state.analysisResult);
+        setPdfName(location.state.pdfName || 'Unnamed PDF');
         
-        // Save new analysis if authenticated
-        if (session) {
+        // Save new analysis
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
+        if (user) {
           const { error: insertError } = await supabase.from('pdf_analyses').insert({
-            user_id: session.user.id,
-            pdf_name: analysisData.pdf_name,
-            analysis_result: analysisData.analysis_result,
+            user_id: user.id,
+            pdf_name: location.state.pdfName || 'Unnamed PDF',
+            analysis_result: location.state.analysisResult,
           });
 
           if (insertError) {
             console.error('Error saving analysis result:', insertError);
           }
         }
-      }
-
-      if (analysisData) {
-        setAnalysisResult(analysisData.analysis_result);
-        setPdfName(analysisData.pdf_name);
       } else {
         setError('No analysis result available');
       }
-      
       setIsLoading(false);
     };
 
@@ -97,15 +87,30 @@ const AnalysisResultPage: React.FC = () => {
     );
   }
 
+  if (!analysisResult) {
+    return (
+      <Layout>
+        <div>No analysis result available. Please return to the home page and try again.</div>
+        <button
+          onClick={() => navigate('/')}
+          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Return to Home
+        </button>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <div className="relative">
-        <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
-        {analysisResult && (
-          <Dashboard analysisResult={analysisResult} isAuthenticated={isAuthenticated} />
-        )}
-        {!isAuthenticated && <LoginPrompt />}
-      </div>
+      <button
+          onClick={() => navigate('/')}
+          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Return to Home
+        </button>
+      <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
+      <Dashboard analysisResult={analysisResult} />
       <button
         onClick={() => navigate('/')}
         className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
