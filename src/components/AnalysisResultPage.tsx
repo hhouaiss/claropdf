@@ -24,6 +24,7 @@ const AnalysisResultPage: React.FC = () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
 
+      let analysisData;
       if (id) {
         // Fetch saved analysis
         const { data, error } = await supabase
@@ -39,32 +40,35 @@ const AnalysisResultPage: React.FC = () => {
           return;
         }
 
-        if (data) {
-          setAnalysisResult(data.analysis_result);
-          setPdfName(data.pdf_name);
-        } else {
-          setError('Analysis not found');
-        }
+        analysisData = data;
       } else if (location.state?.analysisResult) {
         // New analysis
-        setAnalysisResult(location.state.analysisResult);
-        setPdfName(location.state.pdfName || 'Unnamed PDF');
+        analysisData = {
+          analysis_result: location.state.analysisResult,
+          pdf_name: location.state.pdfName || 'Unnamed PDF'
+        };
         
         // Save new analysis if authenticated
         if (session) {
           const { error: insertError } = await supabase.from('pdf_analyses').insert({
             user_id: session.user.id,
-            pdf_name: location.state.pdfName || 'Unnamed PDF',
-            analysis_result: location.state.analysisResult,
+            pdf_name: analysisData.pdf_name,
+            analysis_result: analysisData.analysis_result,
           });
 
           if (insertError) {
             console.error('Error saving analysis result:', insertError);
           }
         }
+      }
+
+      if (analysisData) {
+        setAnalysisResult(analysisData.analysis_result);
+        setPdfName(analysisData.pdf_name);
       } else {
         setError('No analysis result available');
       }
+      
       setIsLoading(false);
     };
 
@@ -84,10 +88,10 @@ const AnalysisResultPage: React.FC = () => {
       <Layout>
         <div className="text-red-600">{error}</div>
         <button
-          onClick={() => navigate('/user-dashboard')}
+          onClick={() => navigate('/')}
           className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          Return to Dashboard
+          Return to Home
         </button>
       </Layout>
     );
@@ -97,7 +101,9 @@ const AnalysisResultPage: React.FC = () => {
     <Layout>
       <div className="relative">
         <h1 className="text-2xl font-bold mb-4">Analysis Result for: {pdfName}</h1>
-        <Dashboard analysisResult={analysisResult} isAuthenticated={isAuthenticated} />
+        {analysisResult && (
+          <Dashboard analysisResult={analysisResult} isAuthenticated={isAuthenticated} />
+        )}
         {!isAuthenticated && <LoginPrompt />}
       </div>
       <button
