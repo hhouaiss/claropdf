@@ -41,13 +41,13 @@ const DownloadShareButtons: React.FC<DownloadShareProps> = ({ analysisResult, pd
 
   return (
     <div className="flex space-x-4">
-      <button 
+      {/* <button 
         onClick={handleDownload}
         className="text-gray-500 hover:text-gray-700 transition-colors" 
         aria-label="Download"
       >
         <Download size={24} />
-      </button>
+      </button> */}
       <button 
         onClick={handleShare}
         className="text-gray-500 hover:text-gray-700 transition-colors relative" 

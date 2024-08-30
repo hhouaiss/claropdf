@@ -18,7 +18,7 @@ export interface AnalysisResult {
   summary: { text: string; page: number };
   key_insights: Array<{ title: string; explanation: string; page: number }>;
   key_statistics: Array<{ label: string; value: string; page: number }>;
-  action_items: Array<{ text: string; page: number }>;
+  takeaways: Array<{ text: string; page: number }>;
 }
 
 export async function extractTextFromPDF(file: File): Promise<string> {
@@ -52,7 +52,7 @@ function parseAIResponse(responseText: string): AnalysisResult {
     const parsed = JSON.parse(jsonString);
     
     // Validate the parsed object has the expected structure
-    if (!parsed.summary || !parsed.key_insights || !parsed.key_statistics || !parsed.action_items) {
+    if (!parsed.summary || !parsed.key_insights || !parsed.key_statistics || !parsed.takeaways) {
       throw new Error('Response is missing required fields');
     }
     
@@ -80,9 +80,9 @@ export async function analyzePDF(text: string): Promise<AnalysisResult> {
           role: "user",
           content: `Analyze the following text and provide:
           1. A brief summary (max 150 words)
-          2. 4-5 key insights, each with a title and brief explanation
-          3. 3-4 important statistics or numbers, each with a label and value
-          4. 2-3 action items or recommendations
+          2. 4-6 key insights, each with a title and brief explanation
+          3. 4-6 important statistics or numbers, each with a label and value
+          4. 5 Takeaways from the document
 
           Respond ONLY with a JSON object in this exact format:
           {
@@ -93,7 +93,7 @@ export async function analyzePDF(text: string): Promise<AnalysisResult> {
             "key_statistics": [
               {"label": "Statistic Label", "value": "Value", "page": 1}
             ],
-            "action_items": [
+            "takeaways": [
               {"text": "Action item 1", "page": 1}
             ]
           }
