@@ -161,13 +161,13 @@ const AnalysisResultPage: React.FC = () => {
 		<div className="flex justify-between items-center mb-6">
 		<h1 className="text-3xl font-bold">Analysis Result: {pdfName}</h1>
 		<div className="flex space-x-4">
-		<button 
+		{/* <button 
 		onClick={handleDownload}
 		className="text-gray-500 hover:text-gray-700 transition-colors" 
 		aria-label="Download"
 		>
 		<Download size={24} />
-		</button>
+		</button> */}
 		<button 
 		onClick={handleShare}
 		className="text-gray-500 hover:text-gray-700 transition-colors relative" 
